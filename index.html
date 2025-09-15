@@ -364,56 +364,61 @@
         </div>
     </div>
 
-    <!-- Modal para adicionar empresa -->
-    <div id="addCompanyModal" class="modal">
-        <div class="modal-content">
-            <h3>Adicionar Nova Empresa</h3>
-            <form id="addCompanyForm">
-                <div class="form-group">
-                    <label>Nome da Empresa</label>
-                    <input type="text" id="companyName" required>
-                </div>
-                <div class="form-group">
-                    <label>Setor</label>
-                    <select id="companySector" required>
-                        <option value="">Selecione um setor</option>
-                        <option value="Tecnologia">Tecnologia</option>
-                        <option value="Saúde">Saúde</option>
-                        <option value="Educação">Educação</option>
-                        <option value="Finanças">Finanças</option>
-                        <option value="E-commerce">E-commerce</option>
-                        <option value="Consultoria">Consultoria</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Manufatura">Manufatura</option>
-                        <option value="Varejo">Varejo</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea id="companyDescription" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Tamanho da Empresa</label>
-                    <select id="companySize" required>
-                        <option value="">Selecione o tamanho</option>
-                        <option value="Startup">Startup (1-50)</option>
-                        <option value="Pequena">Pequena (51-200)</option>
-                        <option value="Média">Média (201-1000)</option>
-                        <option value="Grande">Grande (1000+)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Localização</label>
-                    <input type="text" id="companyLocation" required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Adicionar</button>
-                </div>
-            </form>
-        </div>
+<!-- Modal para adicionar empresa -->
+<div id="addCompanyModal" class="modal">
+    <div class="modal-content">
+        <h3>Adicionar Nova Empresa</h3>
+        <form id="addCompanyForm">
+            <div class="form-group">
+                <label>Nome da Empresa</label>
+                <input type="text" id="companyName" required>
+            </div>
+            <div class="form-group">
+                <label>Setor</label>
+                <select id="companySector" required>
+                    <option value="">Selecione um setor</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Educação">Educação</option>
+                    <option value="Finanças">Finanças</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Consultoria">Consultoria</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Manufatura">Manufatura</option>
+                    <option value="Varejo">Varejo</option>
+                    <option value="Outro">Outro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Logo da Empresa</label>
+                <input type="file" id="companyLogo" accept="image/*">
+                <small>Selecione uma imagem (opcional)</small>
+            </div>
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="companyDescription" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tamanho da Empresa</label>
+                <select id="companySize" required>
+                    <option value="">Selecione o tamanho</option>
+                    <option value="Startup">Startup (1-50)</option>
+                    <option value="Pequena">Pequena (51-200)</option>
+                    <option value="Média">Média (201-1000)</option>
+                    <option value="Grande">Grande (1000+)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Localização</label>
+                <input type="text" id="companyLocation" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Adicionar</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <div id="matchNotification" class="match-notification">
         🎉 É um Match! Você curtiu essa empresa!
@@ -473,41 +478,48 @@
         let matches = [];
         let nextId = companies.length + 1;
 
-        function displayCurrentCompany() {
-            if (currentCompanyIndex >= companies.length) {
-                document.getElementById('companyCard').innerHTML = `
-                    <div class="no-more-companies">
-                        🎉 Você viu todas as empresas disponíveis!<br>
-                        <small>Adicione mais empresas para continuar explorando.</small>
-                    </div>
-                `;
-                return;
-            }
+function displayCurrentCompany() {
+    if (currentCompanyIndex >= companies.length) {
+        document.getElementById('companyCard').innerHTML = `
+            <div class="no-more-companies">
+                🎉 Você viu todas as empresas disponíveis!<br>
+                <small>Adicione mais empresas para continuar explorando.</small>
+            </div>
+        `;
+        return;
+    }
+    const company = companies[currentCompanyIndex];
 
-            const company = companies[currentCompanyIndex];
-            const logoLetter = company.name.charAt(0).toUpperCase();
-            
-            document.getElementById('companyCard').innerHTML = `
-                <div class="company-logo">${logoLetter}</div>
-                <div class="company-name">${company.name}</div>
-                <div class="company-sector">${company.sector}</div>
-                <div class="company-description">${company.description}</div>
-                <div class="company-details">
-                    <div class="detail-item">
-                        <span class="detail-value">${company.size}</span>
-                        <div class="detail-label">Tamanho</div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-value">${company.employees}</span>
-                        <div class="detail-label">Funcionários</div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-value">${company.location.split(',')[0]}</span>
-                        <div class="detail-label">Cidade</div>
-                    </div>
-                </div>
-            `;
-        }
+    // Verifica se a empresa tem uma logo carregada, senão usa a letra inicial
+    let logoHTML;
+    if (company.logo) {
+        logoHTML = `<img src="${company.logo}" alt="Logo ${company.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">`;
+    } else {
+        const logoLetter = company.name.charAt(0).toUpperCase();
+        logoHTML = `<div class="company-logo">${logoLetter}</div>`;
+    }
+
+    document.getElementById('companyCard').innerHTML = `
+        ${logoHTML}
+        <div class="company-name">${company.name}</div>
+        <div class="company-sector">${company.sector}</div>
+        <div class="company-description">${company.description}</div>
+        <div class="company-details">
+            <div class="detail-item">
+                <span class="detail-value">${company.size}</span>
+                <div class="detail-label">Tamanho</div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-value">${company.employees}</span>
+                <div class="detail-label">Funcionários</div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-value">${company.location.split(',')[0]}</span>
+                <div class="detail-label">Cidade</div>
+            </div>
+        </div>
+    `;
+}
 
         function likeCompany() {
             if (currentCompanyIndex >= companies.length) return;
@@ -582,27 +594,46 @@
             }
         }
 
-        document.getElementById('addCompanyForm').onsubmit = function(event) {
-            event.preventDefault();
-            
-            const newCompany = {
-                id: nextId++,
-                name: document.getElementById('companyName').value,
-                sector: document.getElementById('companySector').value,
-                description: document.getElementById('companyDescription').value,
-                size: document.getElementById('companySize').value,
-                location: document.getElementById('companyLocation').value,
-                employees: getEmployeesRange(document.getElementById('companySize').value)
-            };
-            
-            companies.push(newCompany);
-            closeAddModal();
-            
-            // Se não há mais empresas para mostrar, mostrar a nova
-            if (currentCompanyIndex >= companies.length - 1) {
-                displayCurrentCompany();
-            }
+document.getElementById('addCompanyForm').onsubmit = function(event) {
+    event.preventDefault();
+
+    const fileInput = document.getElementById('companyLogo');
+    const file = fileInput.files[0];
+
+    // Função para lidar com a leitura do arquivo e adicionar a empresa
+    const addCompanyWithLogo = (logoUrl = null) => {
+        const newCompany = {
+            id: nextId++,
+            name: document.getElementById('companyName').value,
+            sector: document.getElementById('companySector').value,
+            description: document.getElementById('companyDescription').value,
+            size: document.getElementById('companySize').value,
+            location: document.getElementById('companyLocation').value,
+            employees: getEmployeesRange(document.getElementById('companySize').value),
+            logo: logoUrl // Armazena a URL da logo (pode ser null)
         };
+
+        companies.push(newCompany);
+        closeAddModal();
+
+        // Se não há mais empresas para mostrar, mostrar a nova
+        if (currentCompanyIndex >= companies.length - 1) {
+            displayCurrentCompany();
+        }
+    };
+
+    // Se um arquivo foi selecionado, ler como data URL
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            addCompanyWithLogo(e.target.result); // Passa a URL da imagem
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // Se nenhum arquivo foi selecionado, adicionar sem logo
+        addCompanyWithLogo();
+    }
+};
 
         function getEmployeesRange(size) {
             const ranges = {
