@@ -9,7 +9,7 @@ Este projeto foi desenvolvido durante meus estudos pessoais, com o objetivo de e
 🛠️ Tecnologias Usadas
 HTML, CSS, JavaScript
 🚀 Como Usar
-Apenas acesse esse link:
+Apenas acesse esse link: https://calebe-rocha.github.io/Company-match/
 📬 Feedback
 Encontrou um bug? Tem uma sugestão? Sinta-se à vontade para abrir uma issue — toda ajuda é bem-vinda, mesmo que eu não atualize o projeto com frequência.
 
