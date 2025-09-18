@@ -1,5 +1,5 @@
-# 🏢 Company-match 
-Um site feito para ajudar pessoas a encontrarem empresas de forma divertida e intuitiva — com uma interface inspirada no Tinder! 
+# 🏢 TINDER SOCIAL
+Um site feito para ajudar pessoas a encontrarem empresas/instituições de forma divertida e intuitiva — com uma interface inspirada no Tinder! 
 
 📌 Sobre o Projeto
 Este projeto foi desenvolvido durante meus estudos pessoais, com o objetivo de explorar conceitos de UI/UX e interação do usuário. A ideia é permitir que os usuários marquem para conhecer empresas de forma leve e visual, semelhante ao Tinder.
@@ -9,7 +9,7 @@ Este projeto foi desenvolvido durante meus estudos pessoais, com o objetivo de e
 🛠️ Tecnologias Usadas
 HTML, CSS, JavaScript
 🚀 Como Usar
-Apenas acesse esse link: https://calebe-rocha.github.io/Company-match/
+Apenas acesse esse link: https://calebe-rocha.github.io/Tinder-Social/
 📬 Feedback
 Encontrou um bug? Tem uma sugestão? Sinta-se à vontade para abrir uma issue — toda ajuda é bem-vinda, mesmo que eu não atualize o projeto com frequência.
 
