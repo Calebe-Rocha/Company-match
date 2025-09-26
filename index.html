@@ -204,6 +204,39 @@
             font-size: 16px;
         }
 
+        /* Novos estilos para os botões de controle */
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-manage {
+            background: linear-gradient(45deg, #ffd43b, #fab005);
+            color: white;
+            flex: 1;
+            height: 45px;
+            border: none;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: linear-gradient(45deg, #845ec2, #6c5ce7);
+            color: white;
+            flex: 1;
+            height: 45px;
+            border: none;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
         .matches-section {
             margin-top: 30px;
             position: relative;
@@ -254,6 +287,8 @@
             border-radius: 20px;
             width: 90%;
             max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .form-group {
@@ -310,6 +345,17 @@
             cursor: pointer;
         }
 
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
         .no-more-companies {
             text-align: center;
             color: #666;
@@ -334,13 +380,34 @@
         .match-notification.show {
             transform: translateX(0);
         }
+
+        /* Estilos para a lista de empresas gerenciáveis */
+        .company-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .company-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .company-info small {
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <div class="logo">💼 CompanyMatch</div>
-            <div class="subtitle">Encontre a empresa perfeita para você!</div>
+            <div class="logo">💼 Tinder Social</div>
+            <div class="subtitle">Doe para sua nova instituição favorita!</div>
         </div>
 
         <div class="current-company-container">
@@ -352,6 +419,11 @@
         <div class="action-buttons">
             <button class="btn btn-reject" onclick="rejectCompany()">❌</button>
             <button class="btn btn-like" onclick="likeCompany()">❤️</button>
+        </div>
+
+        <div class="control-buttons">
+            <button class="btn-manage" onclick="openManageModal()">🏢 Gerenciar</button>
+            <button class="btn-save" onclick="saveData()">💾 Salvar</button>
         </div>
 
         <button class="btn btn-add" onclick="openAddModal()">➕ Adicionar Nova Empresa</button>
@@ -420,70 +492,121 @@
     </div>
 </div>
 
+<!-- Modal para gerenciar empresas -->
+<div id="manageCompaniesModal" class="modal">
+    <div class="modal-content">
+        <h3>Gerenciar Empresas</h3>
+        <div id="companiesManageList">
+            <!-- Lista de empresas será inserida aqui -->
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeManageModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+
     <div id="matchNotification" class="match-notification">
         🎉 É um Match! Você curtiu essa empresa!
+    </div>
+
+    <div id="saveNotification" class="match-notification">
+        💾 Dados salvos com sucesso!
     </div>
 
     <script>
         // Base de dados das empresas
         let companies = [
-                        {
-                id: 1,
-                name: "TechCorp",
-                sector: "Tecnologia",
-                description: "Empresa inovadora focada em soluções de IA e machine learning para revolucionar o mercado.",
-                size: "Média",
-                location: "São Paulo, SP",
-                employees: "500"
+            {
+                  id: 1,
+                name: "Arraste para a esquerda ",
+                sector: "Aviso",
+                description: "Se passar para a esquerda voce recusa a instituição e araste para a direita para dar match.",
+                size: "Nada",
+                location: "Passe",
+                employees: "0",
+                isUserAdded: false //
             },
         ];
 
         let currentCompanyIndex = 0;
         let matches = [];
+        let rejectedCompanies = []; // Nova variável para empresas rejeitadas
         let nextId = companies.length + 1;
 
-function displayCurrentCompany() {
-    if (currentCompanyIndex >= companies.length) {
-        document.getElementById('companyCard').innerHTML = `
-            <div class="no-more-companies">
-                🎉 Você viu todas as empresas disponíveis!<br>
-                <small>Adicione mais empresas para continuar explorando.</small>
-            </div>
-        `;
-        return;
-    }
-    const company = companies[currentCompanyIndex];
+        // Função para carregar dados salvos
+        function loadSavedData() {
+            try {
+                const savedCompanies = JSON.parse(localStorage.getItem('userAddedCompanies'));
+                if (savedCompanies && savedCompanies.length > 0) {
+                    // Remove empresas adicionadas pelo usuário da lista atual
+                    companies = companies.filter(company => !company.isUserAdded);
+                    // Adiciona as empresas salvas
+                    companies = [...companies, ...savedCompanies];
+                    
+                    // Atualiza o nextId
+                    const maxId = Math.max(...companies.map(c => c.id));
+                    nextId = maxId + 1;
+                }
+            } catch (error) {
+                console.log('Nenhum dado salvo encontrado ou erro ao carregar');
+            }
+        }
 
-    // Verifica se a empresa tem uma logo carregada, senão usa a letra inicial
-    let logoHTML;
-    if (company.logo) {
-        logoHTML = `<img src="${company.logo}" alt="Logo ${company.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">`;
-    } else {
-        const logoLetter = company.name.charAt(0).toUpperCase();
-        logoHTML = `<div class="company-logo">${logoLetter}</div>`;
-    }
+        // Função para salvar dados
+        function saveData() {
+            const userAddedCompanies = companies.filter(company => company.isUserAdded);
+            localStorage.setItem('userAddedCompanies', JSON.stringify(userAddedCompanies));
+            
+            // Mostrar notificação de salvamento
+            const notification = document.getElementById('saveNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
 
-    document.getElementById('companyCard').innerHTML = `
-        ${logoHTML}
-        <div class="company-name">${company.name}</div>
-        <div class="company-sector">${company.sector}</div>
-        <div class="company-description">${company.description}</div>
-        <div class="company-details">
-            <div class="detail-item">
-                <span class="detail-value">${company.size}</span>
-                <div class="detail-label">Tamanho</div>
-            </div>
-            <div class="detail-item">
-                <span class="detail-value">${company.employees}</span>
-                <div class="detail-label">Funcionários</div>
-            </div>
-            <div class="detail-item">
-                <span class="detail-value">${company.location.split(',')[0]}</span>
-                <div class="detail-label">Cidade</div>
-            </div>
-        </div>
-    `;
-}
+        function displayCurrentCompany() {
+            if (currentCompanyIndex >= companies.length) {
+                document.getElementById('companyCard').innerHTML = `
+                    <div class="no-more-companies">
+                        🎉 Você viu todas as empresas disponíveis!<br>
+                        <small>Adicione mais empresas para continuar explorando.</small>
+                    </div>
+                `;
+                return;
+            }
+            const company = companies[currentCompanyIndex];
+
+            // Verifica se a empresa tem uma logo carregada, senão usa a letra inicial
+            let logoHTML;
+            if (company.logo) {
+                logoHTML = `<img src="${company.logo}" alt="Logo ${company.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">`;
+            } else {
+                const logoLetter = company.name.charAt(0).toUpperCase();
+                logoHTML = `<div class="company-logo">${logoLetter}</div>`;
+            }
+
+            document.getElementById('companyCard').innerHTML = `
+                ${logoHTML}
+                <div class="company-name">${company.name}</div>
+                <div class="company-sector">${company.sector}</div>
+                <div class="company-description">${company.description}</div>
+                <div class="company-details">
+                    <div class="detail-item">
+                        <span class="detail-value">${company.size}</span>
+                        <div class="detail-label">Tamanho</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-value">${company.employees}</span>
+                        <div class="detail-label">Funcionários</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-value">${company.location.split(',')[0]}</span>
+                        <div class="detail-label">Cidade</div>
+                    </div>
+                </div>
+            `;
+        }
 
         function likeCompany() {
             if (currentCompanyIndex >= companies.length) return;
@@ -508,6 +631,9 @@ function displayCurrentCompany() {
 
         function rejectCompany() {
             if (currentCompanyIndex >= companies.length) return;
+            
+            const company = companies[currentCompanyIndex];
+            rejectedCompanies.push(company); // Adiciona à lista de rejeitadas
             
             // Animação de swipe
             const card = document.getElementById('companyCard');
@@ -551,53 +677,111 @@ function displayCurrentCompany() {
             document.getElementById('addCompanyForm').reset();
         }
 
-        // Fechar modal ao clicar fora dele
+        function openManageModal() {
+            updateManageCompaniesList();
+            document.getElementById('manageCompaniesModal').style.display = 'block';
+        }
+
+        function closeManageModal() {
+            document.getElementById('manageCompaniesModal').style.display = 'none';
+        }
+
+        function updateManageCompaniesList() {
+            const userAddedCompanies = companies.filter(company => company.isUserAdded);
+            const manageList = document.getElementById('companiesManageList');
+            
+            if (userAddedCompanies.length === 0) {
+                manageList.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Nenhuma empresa adicionada por você ainda.</p>';
+                return;
+            }
+            
+            manageList.innerHTML = userAddedCompanies.map(company => `
+                <div class="company-list-item">
+                    <div class="company-info">
+                        <h4>${company.name}</h4>
+                        <small>${company.sector} • ${company.location}</small>
+                    </div>
+                    <button class="btn-danger" onclick="removeCompany(${company.id})">🗑️ Remover</button>
+                </div>
+            `).join('');
+        }
+
+        function removeCompany(companyId) {
+            if (confirm('Tem certeza que deseja remover esta empresa?')) {
+                // Remove da lista de empresas
+                companies = companies.filter(company => company.id !== companyId);
+                
+                // Remove dos matches se estiver lá
+                matches = matches.filter(company => company.id !== companyId);
+                
+                // Remove das rejeitadas se estiver lá
+                rejectedCompanies = rejectedCompanies.filter(company => company.id !== companyId);
+                
+                // Se a empresa removida era a atual, ajusta o índice
+                if (currentCompanyIndex >= companies.length) {
+                    currentCompanyIndex = Math.max(0, companies.length - 1);
+                }
+                
+                // Atualiza as visualizações
+                updateManageCompaniesList();
+                displayCurrentCompany();
+                updateMatchesList();
+            }
+        }
+
+        // Fechar modals ao clicar fora deles
         document.getElementById('addCompanyModal').onclick = function(event) {
             if (event.target === this) {
                 closeAddModal();
             }
         }
 
-document.getElementById('addCompanyForm').onsubmit = function(event) {
-    event.preventDefault();
-
-    const fileInput = document.getElementById('companyLogo');
-    const file = fileInput.files[0];
-
-    // Função para lidar com a leitura do arquivo e adicionar a empresa
-    const addCompanyWithLogo = (logoUrl = null) => {
-        const newCompany = {
-            id: nextId++,
-            name: document.getElementById('companyName').value,
-            sector: document.getElementById('companySector').value,
-            description: document.getElementById('companyDescription').value,
-            size: document.getElementById('companySize').value,
-            location: document.getElementById('companyLocation').value,
-            employees: getEmployeesRange(document.getElementById('companySize').value),
-            logo: logoUrl // Armazena a URL da logo (pode ser null)
-        };
-
-        companies.push(newCompany);
-        closeAddModal();
-
-        // Se não há mais empresas para mostrar, mostrar a nova
-        if (currentCompanyIndex >= companies.length - 1) {
-            displayCurrentCompany();
+        document.getElementById('manageCompaniesModal').onclick = function(event) {
+            if (event.target === this) {
+                closeManageModal();
+            }
         }
-    };
 
-    // Se um arquivo foi selecionado, ler como data URL
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            addCompanyWithLogo(e.target.result); // Passa a URL da imagem
+        document.getElementById('addCompanyForm').onsubmit = function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('companyLogo');
+            const file = fileInput.files[0];
+
+            // Função para lidar com a leitura do arquivo e adicionar a empresa
+            const addCompanyWithLogo = (logoUrl = null) => {
+                const newCompany = {
+                    id: nextId++,
+                    name: document.getElementById('companyName').value,
+                    sector: document.getElementById('companySector').value,
+                    description: document.getElementById('companyDescription').value,
+                    size: document.getElementById('companySize').value,
+                    location: document.getElementById('companyLocation').value,
+                    employees: getEmployeesRange(document.getElementById('companySize').value),
+                    logo: logoUrl,
+                    isUserAdded: true // Marca como adicionada pelo usuário
+                };
+
+                companies.push(newCompany);
+                closeAddModal();
+
+                // Se não há mais empresas para mostrar, mostrar a nova
+                if (currentCompanyIndex >= companies.length - 1) {
+                    displayCurrentCompany();
+                }
+            };
+
+            // Se um arquivo foi selecionado, ler como data URL
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addCompanyWithLogo(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                addCompanyWithLogo();
+            }
         };
-        reader.readAsDataURL(file);
-    } else {
-        // Se nenhum arquivo foi selecionado, adicionar sem logo
-        addCompanyWithLogo();
-    }
-};
 
         function getEmployeesRange(size) {
             const ranges = {
@@ -641,6 +825,7 @@ document.getElementById('addCompanyForm').onsubmit = function(event) {
         });
 
         // Inicializar a aplicação
+        loadSavedData(); // Carrega dados salvos primeiro
         displayCurrentCompany();
         updateMatchesList();
     </script>
